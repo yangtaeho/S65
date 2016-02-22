@@ -33,4 +33,4 @@ class Img extends V.Display{
 		if(this.loaded) return {width:this.img.width, height:this.img.height};
 		else return {width:0, height:0};
 	}
-}
+};
