@@ -1,5 +1,11 @@
 const V = (()=>{
 	let v;
+	//범용 에러정의
+	const ERROR = Object.defineProperties({}, {
+		isMandatory:{value:({location, details}) => { //필수인자누락시 발생
+			throw new Error('Argument is Mandatory:' + location + '(' + details + ')');
+		}}
+	});
 	const STOP_PROPAGATION = Symbol();//그 이벤트가 도중에 정지되는 경우를 감지하기 위한 속성
 	const EVENT = Symbol(), LISTENER = Symbol(), ONMEASURE = Symbol(), ONOFFSET = Symbol(), ONDRAW = Symbol(), _ONDRAW = Symbol();
 	const CHILDREN = Symbol(), _CHILDREN = Symbol();
@@ -56,14 +62,14 @@ const V = (()=>{
 			cx.fillStyle = style.backgroundColor;
 			cx.fillRect(0,0,width,height);
 		}		
-		static stroke(cx,style,width,height) {
+		static stroke(cx, style, width, height){
 			let t0;
 			if (!style || !style.border || (t0 = style.border.split(/\s+/)).length != 2) return;
-			for (let t1 of t0) {
+			for(let t1 of t0){
 				if (t1.match(/(\d+)/)) cx.lineWidth = parseFloat(t1);
 				else cx.strokeStyle = t1;
 			}
-			cx.strokeRect(0,0,width,height);
+			cx.strokeRect(0, 0, width, height);
 		}
 	};
 	const Canvas = class extends Paint{
@@ -94,31 +100,6 @@ const V = (()=>{
 		}
 		_reset(){
 			this.cx.clearRect(0, 0, this.width, this.height);
-		}
-	};
-	const Css = class{
-		static margin(style){
-			let marginL = 0, marginR = 0, marginT = 0, marginB = 0, v;
-			let rect = style._margin || (style._margin = []);
-			if(v = style.margin){
-				if(typeof v == 'number') marginT = marginB = marginR = marginL = v;
-				else{
-					v = v.split(' ');
-					v.forEach((val,i)=>(v[i] = parseFloat(val)));
-					if(v.length == 2) marginT = marginB = v[0], marginR = marginL = v[1];
-					else if(v.length == 4) marginT = v[0], marginR = v[1], marginB = v[2], marginL = v[3];
-				}
-			}
-			if(v = style.marginLeft) marginL = v;
-			if(v = style.marginRight) marginR = v;
-			if(v = style.marginTop) marginT = v;
-			if(v = style.marginBottom) marginB = v;
-			rect[0] = marginT, rect[1] = marginR, rect[2] = marginB, rect[3] = marginL;
-			return rect;
-		}
-		static size(style, parentWidth, parentHeight){
-			if('width' in style){
-			}
 		}
 	};
 	const paints = {Canvas};
