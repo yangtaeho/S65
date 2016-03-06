@@ -1,3 +1,5 @@
+'use strict';
+
 var SVG = (() => {
 
     const nsSVG = 'http://www.w3.org/2000/svg',
@@ -82,8 +84,8 @@ var SVG = (() => {
 
     class SVGRoot extends SVGCommon {
 
-        constructor() {
-            super('svg');
+        constructor(tag) {
+            super(tag || 'svg');
             this.children = new Set();
         }
 
