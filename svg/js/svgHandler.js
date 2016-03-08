@@ -195,14 +195,22 @@
     SVGPath.prototype.clear = function() { this.element.removeAttribute('d', ''); return this; };
     
     function SVGText(t) { SVGHandler.call(this, t); }
+    SVGText.prototype = new SVGShape();
     SVGText.prototype.pos = function(x, y) {
         this.element.setAttribute('x', x);
         this.element.setAttribute('y', y);
+        return this;
     };
-//    SVGText.prototype.align = function(align) {
-//        this.element.setAttribute('text-anchor', align);
-//    }
     SVGText.prototype.text = function(t) {
-        
+        this.element.textContent = t;
+        return this;
+    };
+    SVGText.prototype.fontSize = function(s) {
+        this.element.style.fontSize = s;
+        return this;
+    };
+    SVGText.prototype.fontFamily = function(s) {
+        this.element.style.fontFamily = s;
+        return this;
     };
 })('$VG');

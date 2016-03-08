@@ -29,3 +29,8 @@ var g2 = svg.addGroup().stroke('blue', 10, '1 15', 'round').fill('none');
 var line = $VG('<rect>').pos(200, 200, 100, 100)
                         .radius(10)
                         .appendTo(svg);
+
+var text = $VG('<text>').pos(500, 500)
+                        .fontSize('30pt')
+                        .text('hello, world!')
+                        .appendTo(svg);
