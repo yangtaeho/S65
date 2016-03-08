@@ -50,7 +50,17 @@ var $VG = (function() {
     // base constructor
     function SVGHandler(el) { this.element = el; }
     SVGHandler.prototype = {
-        id: function(v) { this.element.setAttribute('id', v); return this; },
+        attr: function(k, v) {
+            if(k instanceof Object)
+                for(var kk in k)
+                    this.element.setAttribute(kk, k[kk]);
+            else if(typeof v == 'undefined')
+                return this.element.getAttribute(k) || '';
+            else
+                this.element.setAttribute(k, v);
+            return this;
+        },
+        id: function(v) { return this.attr('id', v); },
         css: function(k, v) { this.element.style[k] = v; return this; },
         cssText: function(v) { this.element.style.cssText = v; return this; },
         className: function(v) { this.element.className.baseVal = v; return this; },
@@ -104,19 +114,16 @@ var $VG = (function() {
     SVGParent.prototype.addRect = function() { return this.append('<rect>'); };
     SVGParent.prototype.addEllipse = function() { return this.append('<ellipse>'); };
     SVGParent.prototype.addPath = function() { return this.append('<path>'); };
-    //SVGParent.prototype.addText = function() { return this.append('<text>'); };
+    SVGParent.prototype.addText = function() { return this.append('<text>'); };
     //SVGParent.prototype.addImage = function() { return this.append('<image>'); };
     SVGParent.prototype.addGroup = function() { return this.append('<g>'); };
     
     /**
      * implementations
      **********************************/
-    function SVGRoot(t) { SVGHandler.call(this, t); }
+    function SVGRoot(el) { SVGHandler.call(this, el); }
     SVGRoot.prototype = new SVGParent();
-    SVGRoot.prototype.viewBox = function(t, l, w, h) {
-        this.element.setAttribute('viewBox', [t, l, w, h].join(' '));
-        return this;
-    };
+    SVGRoot.prototype.viewBox = function(t, l, w, h) { return this.attr('viewBox', [t, l, w, h].join(' ')); };
     // override
     SVGRoot.prototype.appendTo = function(t) {
         if(typeof t == 'string')
@@ -128,54 +135,27 @@ var $VG = (function() {
         return this;
     };
     
-    function SVGGroup(t) { SVGHandler.call(this, t); }
+    function SVGGroup(el) { SVGHandler.call(this, el); }
     SVGGroup.prototype = new SVGParent();
     SVGGroup.prototype.fill = SVGShape.prototype.fill;
     SVGGroup.prototype.stroke = SVGShape.prototype.stroke;
     
-    function SVGLine(t) { SVGHandler.call(this, t); }
+    function SVGLine(el) { SVGHandler.call(this, el); }
     SVGLine.prototype = new SVGShape();
-    SVGLine.prototype.pos = function(x1, y1, x2, y2) {
-        this.element.setAttribute('x1', x1);
-        this.element.setAttribute('y1', y1);
-        this.element.setAttribute('x2', x2);
-        this.element.setAttribute('y2', y2);
-        return this;
-    };
+    SVGLine.prototype.pos = function(x1, y1, x2, y2) { return this.attr({ x1:x1, y1:y1, x2:x2, y2:y2 }); };
     
-    function SVGRect(t) { SVGHandler.call(this, t); }
+    function SVGRect(el) { SVGHandler.call(this, el); }
     SVGRect.prototype = new SVGShape();
-    SVGRect.prototype.pos = function(x, y, width, height) {
-        this.element.setAttribute('x', x);
-        this.element.setAttribute('y', y);
-        this.element.setAttribute('width', width);
-        this.element.setAttribute('height', height);
-        return this;
-    };
-    SVGRect.prototype.radius = function(rx, ry) {
-        this.element.setAttribute('rx', rx);
-        this.element.setAttribute('ry', ry || rx);
-        return this;
-    };
+    SVGRect.prototype.pos = function(x, y, width, height) { return this.attr({ x:x, y:y, width:width, height:height }); };
+    SVGRect.prototype.radius = function(rx, ry) { return this.attr({ rx:rx, ry:ry||rx }); }
     
-    function SVGEllipse(t) { SVGHandler.call(this, t); }
+    function SVGEllipse(el) { SVGHandler.call(this, el); }
     SVGEllipse.prototype = new SVGShape();
-    SVGEllipse.prototype.pos = function(cx, cy, rx, ry) {
-        this.element.setAttribute('cx', cx);
-        this.element.setAttribute('cy', cy);
-        this.element.setAttribute('rx', rx);
-        this.element.setAttribute('ry', ry || rx);
-        return this;
-    };
+    SVGEllipse.prototype.pos = function(cx, cy, rx, ry) { return this.attr({ cx:cx, cy:cy, rx:rx, ry:ry||rx }); }
     
-    function SVGPath(t) { SVGHandler.call(this, t); }
+    function SVGPath(el) { SVGHandler.call(this, el); }
     SVGPath.prototype = new SVGShape();
-    SVGPath.prototype.addPath = function() {
-        var d = this.element.getAttribute('d') || '';
-        d += ' ' + Array.prototype.join.call(arguments, ' ');
-        this.element.setAttribute('d', d);
-        return this;
-    };
+    SVGPath.prototype.addPath = function() { return this.attr('d', [this.attr('d')].concat([].slice.call(arguments)).join(' ')); };
     SVGPath.prototype.moveTo = function(x, y) { return this.addPath('M', x, y); };
     SVGPath.prototype.moveBy = function(x, y) { return this.addPath('m', x, y); };
     SVGPath.prototype.lineTo = function(x, y) { return this.addPath('L', x, y); };
@@ -187,15 +167,11 @@ var $VG = (function() {
     SVGPath.prototype.close = function() { return this.addPath('Z'); };
     SVGPath.prototype.clear = function() { this.element.removeAttribute('d', ''); return this; };
     
-    function SVGText(t) { SVGHandler.call(this, t); }
+    function SVGText(el) { SVGHandler.call(this, el); }
     SVGText.prototype = new SVGShape();
-    SVGText.prototype.pos = function(x, y) {
-        this.element.setAttribute('x', x);
-        this.element.setAttribute('y', y);
-        return this;
-    };
-    SVGText.prototype.text = function(t) {
-        this.element.textContent = t;
+    SVGText.prototype.pos = function(x, y) { return this.attr({ x:x, y:y }); }
+    SVGText.prototype.text = function(c) {
+        this.element.textContent = c;
         return this;
     };
     SVGText.prototype.fontSize = function(s) {
