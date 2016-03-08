@@ -1,6 +1,7 @@
-(function(ns) {
+var $VG = (function() {
     var nsSVG = 'http://www.w3.org/2000/svg',
         nsXlink = 'http://www.w3.org/1999/xlink',
+        buffer = document.createElementNS(nsSVG, 'svg'),
         types = {
             'svg': SVGRoot,
             'g': SVGGroup,
@@ -9,35 +10,42 @@
             'ellipse': SVGEllipse,
             'path': SVGPath,
             'text': SVGText
-        },
-        _parseTag_ = function(s) {
-            var ret = {
-                tagName: undefined,
-                attr: undefined,
-                innerHTML: undefined
-            };
-            // blahblah
-            return ret;
-        };
+        }
     
     // svg factory function
     function SVGFactory(t) {
         t = t || '<svg>';
-        if(t instanceof SVGHandler) {      // SVGHandler 인스턴스가 넘어왔을 때 : 바로 돌려줌
+        if(t instanceof SVGHandler) {
             return t;
         } else if(this instanceof SVGFactory) {
-            var rs = /<(.*)>/g.exec(t);
-            if(rs instanceof Array && rs.length>1) {    // tag string
-                t = document.createElementNS(nsSVG, rs[1]); // TODO: need a Tag parser
-            } else if(typeof t == 'string') {                               // css query가 왔을 때
-                t = document.querySelector(t);
-            }                                                            // 아니면 얘는 썡 element라고 가정
+            var r = /<.*>/g.exec(t);
+            if(r instanceof Array) {
+                buffer.innerHTML = r[0];
+                t = buffer.firstElementChild;
+            } else if(typeof t == 'string') {
+                t = document.querySelector(t);  // TODO: collection으로 반환
+            }
+            
+            if(!types[t.tagName]) throw new Error(t.tagName + ' is not a valid SVG element!');
             return new types[t.tagName](t);
         } else {
-            return new SVGFactory(t);                                   // new 키워드 안 쓰면 돌리기
+            return new SVGFactory(t);
         }
     }
-    this[ns] = SVGFactory;
+    
+    // svg collection
+    function SVGCollection() {}
+    SVGCollection.prototype = {
+        first: function() { return this[0]; },
+        forEach: Array.prototype.forEach,
+        map: Array.prototype.map,
+        filter: Array.prototype.filter,
+        css: function() {},
+        cssText: function() {},
+        className: function() {},
+        appendTo: function() {}
+    };
+
     
     // base constructor
     function SVGHandler(el) { this.element = el; }
@@ -48,7 +56,7 @@
         className: function(v) { this.element.className.baseVal = v; return this; },
         appendTo: function(t) {
             t = SVGFactory(t);
-            if(t instanceof SVGSet)
+            if(t instanceof SVGParent)
                 t.append(this);
             else
                throw new Error('cannot append SVG element to a HTMLElement');
@@ -56,7 +64,7 @@
         }
     };
     
-    // shapes
+    // common props for SVG shapes
     function SVGShape() {}
     SVGShape.prototype = new SVGHandler();
     SVGShape.prototype.fill = function(fill, fillrule) {
@@ -74,52 +82,37 @@
     };
     
     // common props for <svg>, <g>
-    function SVGSet() {}
-    SVGSet.prototype = new SVGHandler();
-    SVGSet.prototype.children = function() {
+    function SVGParent() {}
+    SVGParent.prototype = new SVGHandler();
+    SVGParent.prototype.children = function() {
         var c = this.element.children, ret = [], i;
         for(i=0; i<c.length; ++i)
             ret.push(SVGFactory(c[i]));
         return ret;
     };
-    SVGSet.prototype.append = function(t) {
+    SVGParent.prototype.append = function(t) {
         t = SVGFactory(t);
         this.element.appendChild(t.element);
         return t;
     };
-    SVGSet.prototype.remove = function(t) {   // TODO: element나 SVGHandler밖에 못옴.
-                                              // querySelector도 쓸 수 있게 개선해야 하지 않을까?
-        this.element.removeChild(t instanceof SVGHandler? t.element : t);
+    SVGParent.prototype.remove = function(t) {
+        t = SVGFactory(t);
+        this.element.removeChild(t.element);
         return this;
     };
-    SVGSet.prototype.addLine = function() { return this.append('<line>'); };
-    SVGSet.prototype.addRect = function() { return this.append('<rect>'); };
-    SVGSet.prototype.addEllipse = function() { return this.append('<ellipse>'); };
-    SVGSet.prototype.addPath = function() { return this.append('<path>'); };
-    //SVGSet.prototype.addText = function() { return this.append('<text>'); };
-    //SVGSet.prototype.addImage = function() { return this.append('<image>'); };
-    SVGSet.prototype.addGroup = function() { return this.append('<g>'); };
-    
-    /**
-     * Array-like object ct. handlers
-     **********************************/
-    function SVGCollection() {}
-    SVGCollection.prototype = {
-        first: function() {},
-        forEach: function() {},
-        map: function() {},
-        filter: function() {},
-        css: function() {},
-        cssText: function() {},
-        className: function() {},
-        appendTo: function() {}
-    };
+    SVGParent.prototype.addLine = function() { return this.append('<line>'); };
+    SVGParent.prototype.addRect = function() { return this.append('<rect>'); };
+    SVGParent.prototype.addEllipse = function() { return this.append('<ellipse>'); };
+    SVGParent.prototype.addPath = function() { return this.append('<path>'); };
+    //SVGParent.prototype.addText = function() { return this.append('<text>'); };
+    //SVGParent.prototype.addImage = function() { return this.append('<image>'); };
+    SVGParent.prototype.addGroup = function() { return this.append('<g>'); };
     
     /**
      * implementations
      **********************************/
     function SVGRoot(t) { SVGHandler.call(this, t); }
-    SVGRoot.prototype = new SVGSet();
+    SVGRoot.prototype = new SVGParent();
     SVGRoot.prototype.viewBox = function(t, l, w, h) {
         this.element.setAttribute('viewBox', [t, l, w, h].join(' '));
         return this;
@@ -136,7 +129,7 @@
     };
     
     function SVGGroup(t) { SVGHandler.call(this, t); }
-    SVGGroup.prototype = new SVGSet();
+    SVGGroup.prototype = new SVGParent();
     SVGGroup.prototype.fill = SVGShape.prototype.fill;
     SVGGroup.prototype.stroke = SVGShape.prototype.stroke;
     
@@ -213,4 +206,8 @@
         this.element.style.fontFamily = s;
         return this;
     };
-})('$VG');
+    
+    return SVGFactory;
+})();
+
+if(typeof module!='undefined' && module.exports) module.exports($VG);
