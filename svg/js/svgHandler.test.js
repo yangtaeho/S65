@@ -1,36 +1,20 @@
-var svg = $VG().css('border', '1px solid black')
-               .viewBox(0, 0, 1000, 1000)
-               .appendTo(document.body);
-    svg.addPath()
-       .stroke('black', 2, '10 5', 'square', 'round')
-       .fill('none')
-       .moveTo(100, 100)
-       .lineTo(900, 900)
-       .lineTo(100, 900)
-       .qBezTo(200, 200, 900, 100)
-       .close();
+var svg = $VG().css({
+                border: '1px solid black',
+                width: '960px',
+                height: '540px'
+            }).viewBox(0, 0, 960, 540)
+              .appendTo(document.body);
 
-var g1 = svg.addGroup().stroke('red', 2).fill('none');
+//line
+svg.addLine().stroke('black', 2).pos(10, 10, 90, 60);
+svg.addLine().id('myLine').className('clsLine').stroke('black', 1, '1 1').pos(10, 20, 90, 70);
+$VG('<line>').stroke('green', 3, null, 'round').pos(10, 30, 90, 80).appendTo(svg);
+$VG('<line stroke="red" x1="10" y1="40" x2="90" y2="90" />').appendTo(svg);
 
-    g1.addLine().pos(100, 900, 900, 100);
-    g1.addPath()
-      .moveTo(100, 900)
-      .qBezTo(800, 800, 900, 100);
-
-
-var g2 = svg.addGroup().stroke('blue', 10, '1 15', 'round').fill('none');
-    g2.addRect()
-      .pos(10, 10, 980, 980)
-      .radius(50);
-    g2.addEllipse()
-      .pos(800, 200, 400, 200)
-      .css('transform', 'rotate(30deg)');
-
-var line = $VG('<rect>').pos(200, 200, 100, 100)
-                        .radius(10)
-                        .appendTo(svg);
-
-var text = $VG('<text>').pos(500, 500)
-                        .fontSize('30pt')
-                        .text('hello, world!')
-                        .appendTo(svg);
+//rect
+svg.addRect().pos(110, 10, 90, 90);
+svg.addRect().fill('none').stroke('white').pos(115, 15, 80, 80);
+svg.addRect().fill('yellow').pos(120, 20, 70, 70).radius(5);
+$VG('<rect>').fill('red').pos(125, 25, 60, 60).radius(10, 30).appendTo(svg);
+                                                                      
+                                                                    
