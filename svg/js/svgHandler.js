@@ -10,7 +10,7 @@ var $VG = (function() {
             'ellipse': SVGEllipse,
             'path': SVGPath,
             'text': SVGText
-        }
+        };
     
     // svg factory function
     function SVGFactory(t) {
@@ -23,7 +23,7 @@ var $VG = (function() {
                 buffer.innerHTML = r[0];
                 t = buffer.firstElementChild;
             } else if(typeof t == 'string') {
-                t = document.querySelector(t);  // TODO: collection으로 반환
+                return new SVGCollection(document.querySelectorAll(t));
             }
             
             if(!types[t.tagName]) throw new Error(t.tagName + ' is not a valid SVG element!');
@@ -34,18 +34,33 @@ var $VG = (function() {
     }
     
     // svg collection
-    function SVGCollection() {}
-    SVGCollection.prototype = {
-        first: function() { return this[0]; },
-        forEach: Array.prototype.forEach,
-        map: Array.prototype.map,
-        filter: Array.prototype.filter,
-        css: function() {},
-        cssText: function() {},
-        className: function() {},
-        appendTo: function() {}
+    function SVGCollection(l) {
+        for(var i=0; i<l.length; ++i)
+            this[i] = SVGFactory(l[i]);
+        this.length = l.length;
+        this.element = l;
+    }
+    var iterator = function(fn) {
+        return function() {
+            var ret = [], i;
+            for(i=0; i<this.length; i++)
+                this[i][fn] && ret.push(this[i][fn].apply(this[i], arguments));
+            return new SVGCollection(ret);
+        };
     };
-
+    SVGCollection.prototype = {
+        forEach: Array.prototype.forEach,
+        filter: Array.prototype.filter,
+        first: function() { return this[0]; },
+        css: iterator('css'),
+        id: iterator('id'),
+        className: iterator('className'),
+        fill: iterator('fill'),
+        stroke: iterator('stroke'),
+        appendTo: iterator('appendTo'),
+        before: iterator('before'),
+        after: iterator('after')
+    };
     
     // base constructor
     function SVGHandler(el) { this.element = el; }
@@ -75,11 +90,12 @@ var $VG = (function() {
         appendTo: function(t) {
             t = SVGFactory(t);
             if(t instanceof SVGParent)
-                t.append(this);
+                t.element.appendChild(this.element);
             else
                throw new Error('cannot append SVG element to a HTMLElement');
             return this;
         }
+        // TODO : before, after 만들어야됨
     };
     
     // common props for SVG shapes
@@ -103,19 +119,17 @@ var $VG = (function() {
     function SVGParent() {}
     SVGParent.prototype = new SVGHandler();
     SVGParent.prototype.children = function() {
-        var c = this.element.children, ret = [], i;
-        for(i=0; i<c.length; ++i)
-            ret.push(SVGFactory(c[i]));
-        return ret;
+        return new SVGCollection(this.element.children);
+    };
+    SVGParent.prototype.find = function(q) {
+        if(!q) return this.children();
+        return new SVGCollection(this.element.querySelectorAll(q));
     };
     SVGParent.prototype.append = function(t) {
-        t = SVGFactory(t);
-        this.element.appendChild(t.element);
-        return t;
+        return SVGFactory(t).appendTo(this);
     };
     SVGParent.prototype.remove = function(t) {
-        t = SVGFactory(t);
-        this.element.removeChild(t.element);
+        SVGFactory(t).appendTo(SVGFactory(buffer));
         return this;
     };
     SVGParent.prototype.addLine = function() { return this.append('<line>'); };
@@ -154,12 +168,12 @@ var $VG = (function() {
     
     function SVGRect(el) { SVGHandler.call(this, el); }
     SVGRect.prototype = new SVGShape();
-    SVGRect.prototype.pos = function(x, y, width, height) { return this.attr({ x:x, y:y, width:width, height:height }); };
-    SVGRect.prototype.radius = function(rx, ry) { return this.attr({ rx:rx, ry:ry||rx }); }
+    SVGRect.prototype.pos = function(x, y, w, h) { return this.attr({ x:x, y:y, width:w, height:h }); };
+    SVGRect.prototype.radius = function(rx, ry) { return this.attr({ rx:rx, ry:ry||rx }); };
     
     function SVGEllipse(el) { SVGHandler.call(this, el); }
     SVGEllipse.prototype = new SVGShape();
-    SVGEllipse.prototype.pos = function(cx, cy, rx, ry) { return this.attr({ cx:cx, cy:cy, rx:rx, ry:ry||rx }); }
+    SVGEllipse.prototype.pos = function(cx, cy, rx, ry) { return this.attr({ cx:cx, cy:cy, rx:rx, ry:ry||rx }); };
     
     function SVGPath(el) { SVGHandler.call(this, el); }
     SVGPath.prototype = new SVGShape();
@@ -190,6 +204,7 @@ var $VG = (function() {
         this.element.style.fontFamily = s;
         return this;
     };
+    // TODO: Font-weight
     
     return SVGFactory;
 })();
