@@ -60,9 +60,17 @@ var $VG = (function() {
                 this.element.setAttribute(k, v);
             return this;
         },
+        css: function(k, v) {
+            if(k instanceof Object)
+                for(var kk in k)
+                    this.element.style[kk] = k[kk];
+            else if(typeof v == 'undefined')
+                return this.element.style[k];
+            else
+                this.element.style[k] = v;
+            return this;
+        },
         id: function(v) { return this.attr('id', v); },
-        css: function(k, v) { this.element.style[k] = v; return this; },
-        cssText: function(v) { this.element.style.cssText = v; return this; },
         className: function(v) { this.element.className.baseVal = v; return this; },
         appendTo: function(t) {
             t = SVGFactory(t);
