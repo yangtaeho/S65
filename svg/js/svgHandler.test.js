@@ -28,12 +28,12 @@ svg.addPath().moveTo(110, 110).lineBy(0, 80).lineBy(80, 0);
 $VG('<path>').moveTo(210, 110).cBezTo(210, 150, 290, 150, 290, 190).appendTo(svg);
 
 // text
-svg.addText().text('hello, s65!').pos(10, 210);
-svg.addText().text('BsideSoft x Pikicast').pos(10, 250).fontFamily('Courier New').fontSize('30pt');
+svg.addText().text('hello, s65!').pos(10, 210).fill('blue');
+svg.addText().text('BsideSoft x Pikicast').pos(10, 250).fontFamily('Courier New').fontSize('30pt').fontWeight('bolder');
 
 // collection
 svg.find('path').stroke('blue', 3, '1 4', 'round', 'miter').fill('yellow', 'evenodd');
-$VG('ellipse').fill('none');
+$VG('ellipse').css('opacity', '0.2');
 
 // group
 svg.addGroup().fill('none').stroke('black', 1, '1 1').append('text');

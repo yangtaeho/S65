@@ -94,8 +94,18 @@ var $VG = (function() {
             else
                throw new Error('cannot append SVG element to a HTMLElement');
             return this;
+        },
+        before: function(t) {
+            t = SVGFactory(t);
+            if(t instanceof SVGHandler)
+                this.element.insertBefore(t.element);
+            return this;
+        },
+        after: function(t) {
+            t = SVGFactory(t);
+            if(t instanceof SVGHandler)
+                this.element.insertAfter(t.element);
         }
-        // TODO : before, after 만들어야됨
     };
     
     // common props for SVG shapes
@@ -204,7 +214,9 @@ var $VG = (function() {
         this.element.style.fontFamily = s;
         return this;
     };
-    // TODO: Font-weight
+    SVGText.prototype.fontWeight = function(s) {
+        this.element.style.fontWeight = s;
+    };
     
     return SVGFactory;
 })();
