@@ -129,7 +129,7 @@ var $VG = (function() {
         return SVGFactory(t).appendTo(this);
     };
     SVGParent.prototype.remove = function(t) {
-        SVGFactory(t).appendTo(SVGFactory(buffer));
+        SVGFactory(t).appendTo(buffer);
         return this;
     };
     SVGParent.prototype.addLine = function() { return this.append('<line>'); };
