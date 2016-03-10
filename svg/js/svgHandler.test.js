@@ -1,9 +1,9 @@
 var svg = $VG().css({
-                border: '1px solid black',
-                width: '960px',
-                height: '540px'
-            }).viewBox(0, 0, 960, 540)
-              .appendTo(document.body);
+                    border: '1px solid black',
+                    width: '960px',
+                    height: '540px'
+             }).viewBox(0, 0, 960, 540)
+               .appendTo(document.body);
 
 // line
 svg.addLine().stroke('black', 2).pos(10, 10, 90, 60);
@@ -27,7 +27,7 @@ svg.addPath().moveTo(10, 110).lineTo(90, 110).lineTo(10, 190);
 svg.addPath().moveTo(110, 110).lineBy(0, 80).lineBy(80, 0);
 $VG('<path>').moveTo(210, 110).cBezTo(210, 150, 290, 150, 290, 190).appendTo(svg);
 
-// text
+// textㅣ
 svg.addText().text('hello, s65!').pos(10, 210).fill('blue');
 svg.addText().text('BsideSoft x Pikicast').pos(10, 250).fontFamily('Courier New').fontSize('30pt').fontWeight('bolder');
 

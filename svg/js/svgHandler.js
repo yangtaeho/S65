@@ -38,7 +38,6 @@ var $VG = (function() {
         for(var i=0; i<l.length; ++i)
             this[i] = SVGFactory(l[i]);
         this.length = l.length;
-        this.element = l;
     }
     var iterator = function(fn) {
         return function() {
