@@ -6,9 +6,9 @@ var svg = $VG().css({
                .appendTo(document.body);
 
 // line
-svg.addLine().stroke('black', 2).pos(10, 10, 90, 60);
-svg.addLine().id('myLine').className('clsLine').stroke('black', 1, '1 1').pos(10, 20, 90, 70);
-$VG('<line>').stroke('green', 3, null, 'round').pos(10, 30, 90, 80).appendTo(svg);
+svg.addLine().stroke('black').strokeWidth(2).pos(10, 10, 90, 60);
+svg.addLine().id('myLine').className('clsLine').stroke('black').dashArray(1, 1).pos(10, 20, 90, 70);
+$VG('<line>').stroke('green').strokeWidth(3).lineCap('round').pos(10, 30, 90, 80).appendTo(svg);
 $VG('<line stroke="red" x1="10" y1="40" x2="90" y2="90" />').appendTo(svg);
 
 // rect
@@ -19,7 +19,7 @@ $VG('<rect>').fill('red').pos(125, 25, 50, 50).radius(10, 30).appendTo(svg);
 
 //ellipse
 svg.addEllipse().fill('gray').pos(250, 50, 40);
-$VG('<ellipse>').stroke('black', 2, '4 4').fill('yellow').pos(250, 50, 35, 15).appendTo(svg);
+$VG('<ellipse>').stroke('black').strokeWidth(2).dashArray(4, 4).fill('yellow').pos(250, 50, 35, 15).appendTo(svg);
 $VG('<ellipse cx="250" cy="50" rx="10" ry="10" fill="red" stroke="black" stroke-width="2"/>').appendTo(svg);
 
 // path && collection
@@ -32,8 +32,8 @@ svg.addText().text('hello, s65!').pos(10, 210).fill('blue');
 svg.addText().text('BsideSoft x Pikicast').pos(10, 250).fontFamily('Courier New').fontSize('30pt').fontWeight('bolder');
 
 // collection
-svg.find('path').stroke('blue', 3, '1 4', 'round', 'miter').fill('yellow', 'evenodd');
+svg.find('path').stroke('blue').strokeWidth(3).dashArray(1, 4).lineCap('round').lineJoin('round').fill('yellow');
 $VG('ellipse').css('opacity', '0.2');
 
 // group
-svg.addGroup().fill('none').stroke('black', 1, '1 1').append('text');
+var a = svg.addGroup().fill('none').stroke('black').dashArray(1, 1).append('text');

@@ -55,7 +55,12 @@ var $VG = (function() {
         id: iterator('id'),
         className: iterator('className'),
         fill: iterator('fill'),
+        fillRule: iterator('fillRule'),
         stroke: iterator('stroke'),
+        strokeWidth: iterator('strokeWidth'),
+        dashArray: iterator('dashArray'),
+        lineCap: iterator('lineCap'),
+        lineJoin: iterator('lineJoin'),
         appendTo: iterator('appendTo'),
         before: iterator('before'),
         after: iterator('after')
@@ -110,19 +115,13 @@ var $VG = (function() {
     // common props for SVG shapes
     function SVGShape() {}
     SVGShape.prototype = new SVGHandler();
-    SVGShape.prototype.fill = function(fill, fillrule) {
-        fill && this.element.setAttribute('fill', fill);
-        fillrule && this.element.setAttribute('fill-rule', fillrule);
-        return this;
-    };
-    SVGShape.prototype.stroke = function(color, width, dasharray, linecap, linejoin) {
-        color && this.element.setAttribute('stroke', color);
-        width && this.element.setAttribute('stroke-width', width);
-        dasharray && this.element.setAttribute('stroke-dasharray', dasharray);
-        linecap && this.element.setAttribute('stroke-linecap', linecap);
-        linejoin && this.element.setAttribute('stroke-linejoin', linejoin);
-        return this;
-    };
+    SVGShape.prototype.fill = function(v) { return this.attr('fill', v); };
+    SVGShape.prototype.fillRule = function(v) { return this.attr('fill-rule', v); };
+    SVGShape.prototype.stroke = function(v) { return this.attr('stroke', v); }; // TODO: stroke parser 만들어야징
+    SVGShape.prototype.strokeWidth = function(v) { return this.attr('stroke-width', v); };
+    SVGShape.prototype.dashArray = function() { return this.attr('stroke-dasharray', [].slice.call(arguments).join(' ')); };
+    SVGShape.prototype.lineCap = function(v) { return this.attr('stroke-linecap', v); };
+    SVGShape.prototype.lineJoin = function(v) { return this.attr('stroke-linejoin', v); };
     
     // common props for <svg>, <g>
     function SVGParent() {}
@@ -169,7 +168,12 @@ var $VG = (function() {
     function SVGGroup(el) { SVGHandler.call(this, el); }
     SVGGroup.prototype = new SVGParent();
     SVGGroup.prototype.fill = SVGShape.prototype.fill;
+    SVGGroup.prototype.fillRule = SVGShape.prototype.fillRule;
     SVGGroup.prototype.stroke = SVGShape.prototype.stroke;
+    SVGGroup.prototype.strokeWidth = SVGShape.prototype.strokeWidth;
+    SVGGroup.prototype.dashArray = SVGShape.prototype.dashArray;
+    SVGGroup.prototype.lineCap = SVGShape.prototype.lineCap;
+    SVGGroup.prototype.lineJoin = SVGShape.prototype.lineJoin;
     
     function SVGLine(el) { SVGHandler.call(this, el); }
     SVGLine.prototype = new SVGShape();
@@ -200,7 +204,7 @@ var $VG = (function() {
     
     function SVGText(el) { SVGHandler.call(this, el); }
     SVGText.prototype = new SVGShape();
-    SVGText.prototype.pos = function(x, y) { return this.attr({ x:x, y:y }); }
+    SVGText.prototype.pos = function(x, y) { return this.attr({ x:x, y:y }); };
     SVGText.prototype.text = function(c) {
         this.element.textContent = c;
         return this;
