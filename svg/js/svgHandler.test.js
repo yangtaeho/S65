@@ -36,4 +36,4 @@ svg.find('path').stroke('blue').strokeWidth(3).dashArray(1, 4).lineCap('round').
 $VG('ellipse').css('opacity', '0.2');
 
 // group
-var a = svg.addGroup().fill('none').stroke('black').dashArray(1, 1).append('text');
+svg.addGroup().fill('none').stroke('black').dashArray(1, 1).append('text');

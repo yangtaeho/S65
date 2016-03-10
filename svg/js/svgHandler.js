@@ -115,13 +115,13 @@ var $VG = (function() {
     // common props for SVG shapes
     function SVGShape() {}
     SVGShape.prototype = new SVGHandler();
-    SVGShape.prototype.fill = function(v) { return this.attr('fill', v); };
-    SVGShape.prototype.fillRule = function(v) { return this.attr('fill-rule', v); };
-    SVGShape.prototype.stroke = function(v) { return this.attr('stroke', v); }; // TODO: stroke parser 만들어야징
-    SVGShape.prototype.strokeWidth = function(v) { return this.attr('stroke-width', v); };
-    SVGShape.prototype.dashArray = function() { return this.attr('stroke-dasharray', [].slice.call(arguments).join(' ')); };
-    SVGShape.prototype.lineCap = function(v) { return this.attr('stroke-linecap', v); };
-    SVGShape.prototype.lineJoin = function(v) { return this.attr('stroke-linejoin', v); };
+    SVGShape.prototype.fill = function(v) { return this.css('fill', v); };
+    SVGShape.prototype.fillRule = function(v) { return this.css('fill-rule', v); };
+    SVGShape.prototype.stroke = function(v) { return this.css('stroke', v); }; // TODO: stroke parser 만들어야징
+    SVGShape.prototype.strokeWidth = function(v) { return this.css('stroke-width', v); };
+    SVGShape.prototype.dashArray = function() { return this.css('stroke-dasharray', [].slice.call(arguments).join(' ')); };
+    SVGShape.prototype.lineCap = function(v) { return this.css('stroke-linecap', v); };
+    SVGShape.prototype.lineJoin = function(v) { return this.css('stroke-linejoin', v); };
     
     // common props for <svg>, <g>
     function SVGParent() {}
@@ -209,17 +209,9 @@ var $VG = (function() {
         this.element.textContent = c;
         return this;
     };
-    SVGText.prototype.fontSize = function(s) {
-        this.element.style.fontSize = s;
-        return this;
-    };
-    SVGText.prototype.fontFamily = function(s) {
-        this.element.style.fontFamily = s;
-        return this;
-    };
-    SVGText.prototype.fontWeight = function(s) {
-        this.element.style.fontWeight = s;
-    };
+    SVGText.prototype.fontSize = function(v) { return this.css('font-size', v); };
+    SVGText.prototype.fontFamily = function(v) { return this.css('font-family', v); };
+    SVGText.prototype.fontWeight = function(v) { return this.css('font-weight', v); };
     
     return SVGFactory;
 })();
