@@ -80,8 +80,8 @@ let stage = document.getElementById('stage');
 let test = new Display(); //객체 하나 만들고
 let l0, l1; //리스너 두개용
 //리스너 두개 등록함
-test.addListener('test', l0 = (e)=>(stage.innerHTML += '<br>' + [1, e.type].join());
-test.addListener('test', l1 = (e)=>(stage.innerHTML += '<br>' + [2, e.type].join());
+test.addListener('test', l0 = (e)=>(stage.innerHTML += '<br>' + [1, e.type].join()));
+test.addListener('test', l1 = (e)=>(stage.innerHTML += '<br>' + [2, e.type].join()));
 
 test.dispatch('test'); //실행하면 두개다 잘나와야함
 
