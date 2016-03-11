@@ -35,6 +35,8 @@ const V = (()=>{
 	const [offset, size, draw, bound, start, end, reset, image, rect, text] = N(Symbol, 10);
 	
 	const Paint = (([RESET, BOUND, START, END, IMAGE, RECT, TEXT])=>{
+    //const [RESET, BOUND, START, END, IMAGE, RECT, TEXT] = N(Symbol, 7);
+
 		const Paint = class{
 			constructor(width, height){
 				this[size](width, height);
