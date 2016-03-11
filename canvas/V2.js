@@ -42,7 +42,7 @@ const V = (()=>{
 				this[size](width, height);
 			}
 			[size](width, height){
-				define(this, {width, height});
+				readOnly(this, {width, height});
 			}
 			[bound]({x, y, width, height}){this[BOUND](x, y, width, height);}
 			reset(){this[RESET]();}
@@ -103,7 +103,7 @@ const V = (()=>{
 
 		const Display = class{
 			constructor(isBlock){
-				define(this, {
+				readOnly(this, {
 					id:uuid++,
 					[event]:new Event(this),
 					[listener]:{},
