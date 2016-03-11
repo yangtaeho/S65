@@ -1,3 +1,28 @@
+//obj.a = 3;
+//Object.defineProperty(obj, 'a', {
+//  value: 3
+//  //, writable: true,
+//  //enumeble: true
+//});
+//
+//{
+//  get: function(){ return this._a; },
+//// set: function(v){ this._a = v; },
+//  enumeble: true
+//}
+//
+//Object.defineProperties(obj, {
+//  a: {
+//    value: 3
+//  },
+//  b: {
+//    value: 5
+//  }
+//});
+//let V;
+//{
+//  V = ...;
+//}
 const V = (()=>{
 	const readOnly = (target, v)=>{
 		for(let k in v) v[k] = {value:v[k]};
