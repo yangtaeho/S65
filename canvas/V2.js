@@ -128,7 +128,7 @@ const V = (()=>{
 			removeListener(type, callback = null){
 				const target = this[listener][type];
 				if(!target) return;
-				if(listener) target.delete(callback);
+				if(callback) target.delete(callback);
 				else target.clear();
 			}
 			
