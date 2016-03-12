@@ -192,13 +192,41 @@ var $VG = (function() {
     SVGPath.prototype = new SVGShape();
     SVGPath.prototype.addPath = function() { return this.attr('d', [this.attr('d')].concat([].slice.call(arguments)).join(' ')); };
     SVGPath.prototype.moveTo = function(x, y) { return this.addPath('M', x, y); };
-    SVGPath.prototype.moveBy = function(x, y) { return this.addPath('m', x, y); };
-    SVGPath.prototype.lineTo = function(x, y) { return this.addPath('L', x, y); };
-    SVGPath.prototype.lineBy = function(x, y) { return this.addPath('l', x, y); };
-    SVGPath.prototype.qBezTo = function(x1, y1, x2, y2) { return this.addPath('Q', x1, y1, x2, y2); };
-    SVGPath.prototype.qBezBy = function(x1, y1, x2, y2) { return this.addPath('q', x1, y1, x2, y2); };
-    SVGPath.prototype.cBezTo = function(x1, y1, x2, y2, x3, y3) { return this.addPath('C', x1, y1, x2, y2, x3, y3); };
-    SVGPath.prototype.cBezBy = function(x1, y1, x2, y2, x3, y3) { return this.addPath('c', x1, y1, x2, y2, x3, y3); };
+    SVGPath.prototype.moveBy = function() { return this.addPath('m', x, y); };
+    SVGPath.prototype.lineTo = function() {
+        var a = arguments, l=a.length-1, i=0;
+        for(; i<l; i++) this.addPath('L', a[i], a[++i]);
+        return this;
+    };
+    SVGPath.prototype.lineBy = function() {
+        var a=arguments, l=a.length-1, i=0;
+        for(; i<l; i++) this.addPath('l', a[i], a[++i]);
+        return this;
+    };
+    SVGPath.prototype.qBezTo = function() {
+        var a=arguments, l=a.length-1, i=4;
+        this.addPath('Q', a[0], a[1], a[2], a[3]);
+        for(; i<l; i++) this.addPath('T', a[i], a[++i]);
+        return this;
+    };
+    SVGPath.prototype.qBezBy = function() {
+        var a=arguments, l=a.length-1, i=4;
+        this.addPath('q', a[0], a[1], a[2], a[3]);
+        for(; i<l; i++) this.addPath('t', a[i], a[++i]);
+        return this;
+    };
+    SVGPath.prototype.cBezTo = function() {
+        var a=arguments, l=a.length-3, i=6;
+        this.addPath('C', a[0], a[1], a[2], a[3], a[4], a[5]);
+        for(; i<l; i++) this.addPath('S', a[i], a[++i], a[++i], a[++i]);
+        return this;
+    };
+    SVGPath.prototype.cBezBy = function() {
+        var a=arguments, l=a.length-3, i=6;
+        this.addPath('c', a[0], a[1], a[2], a[3], a[4], a[5]);
+        for(; i<l; i++) this.addPath('s', a[i], a[++i], a[++i], a[++i]);
+        return this;
+    };
     SVGPath.prototype.close = function() { return this.addPath('Z'); };
     SVGPath.prototype.clear = function() { this.element.removeAttribute('d', ''); return this; };
     
