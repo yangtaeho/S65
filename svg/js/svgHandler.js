@@ -1,7 +1,7 @@
 var $VG = (function() {
     var nsSVG = 'http://www.w3.org/2000/svg',
         nsXlink = 'http://www.w3.org/1999/xlink',
-        buffer = document.createElementNS(nsSVG, 'svg'),
+        generator = document.createElementNS(nsSVG, 'svg'),
         types = {
             'svg': SVGRoot,
             'g': SVGGroup,
@@ -14,22 +14,18 @@ var $VG = (function() {
     
     // svg factory function
     function SVGFactory(t) {
-        t = t || '<svg>';
-        if(t instanceof SVGHandler) {
-            return t;
-        } else if(this instanceof SVGFactory) {
-            var r = /<.*>/g.exec(t);
-            if(r instanceof Array) {
-                buffer.innerHTML = r[0];
-                t = buffer.firstElementChild;
-            } else if(typeof t == 'string') {
+        var r;
+        switch(true) {
+            case t instanceof SVGHandler:
+                return t;
+            case t instanceof SVGElement:
+                return new types[t.tagName](t);
+            case !!(r = /<.*>/g.exec(t || '<svg>')):
+                generator.innerHTML = r[0];
+                return new types[generator.firstElementChild.tagName](generator.firstElementChild);
+                //return new SVGCollection(generator.children);
+            default:
                 return new SVGCollection(document.querySelectorAll(t));
-            }
-            
-            if(!types[t.tagName]) throw new Error(t.tagName + ' is not a valid SVG element!');
-            return new types[t.tagName](t);
-        } else {
-            return new SVGFactory(t);
         }
     }
     
@@ -39,32 +35,23 @@ var $VG = (function() {
             this[i] = SVGFactory(l[i]);
         this.length = l.length;
     }
-    var iterator = function(fn) {
-        return function() {
-            var ret = [], i;
-            for(i=0; i<this.length; i++)
-                this[i][fn] && ret.push(this[i][fn].apply(this[i], arguments));
-            return new SVGCollection(ret);
+    
+    SVGCollection.prototype = new (function() {
+        this.iterator = function(fn) {
+            return function() {
+                for(var i=0; i<this.length; i++)
+                    this[i][fn] && this[i][fn].apply(this[i], arguments);
+                return this;
+            };
         };
-    };
-    SVGCollection.prototype = {
-        forEach: Array.prototype.forEach,
-        filter: Array.prototype.filter,
-        first: function() { return this[0]; },
-        css: iterator('css'),
-        id: iterator('id'),
-        className: iterator('className'),
-        fill: iterator('fill'),
-        fillRule: iterator('fillRule'),
-        stroke: iterator('stroke'),
-        strokeWidth: iterator('strokeWidth'),
-        dashArray: iterator('dashArray'),
-        lineCap: iterator('lineCap'),
-        lineJoin: iterator('lineJoin'),
-        appendTo: iterator('appendTo'),
-        before: iterator('before'),
-        after: iterator('after')
-    };
+        this.forEach = Array.prototype.forEach;
+        this.first = function() { return this[0]; };
+        ['attr', 'css', 'id', 'className', 'fill', 'fillRule',
+         'stroke', 'strokeWidth', 'dashArray', 'lineCap', 'lineJoin',
+         'appendTo', 'before', 'after'].forEach(function(v) {
+            this[v] = this.iterator(v);
+        }, this);
+    })();
     
     // base constructor
     function SVGHandler(el) { this.element = el; }
@@ -115,13 +102,67 @@ var $VG = (function() {
     // common props for SVG shapes
     function SVGShape() {}
     SVGShape.prototype = new SVGHandler();
+    // fill & stroke
     SVGShape.prototype.fill = function(v) { return this.css('fill', v); };
     SVGShape.prototype.fillRule = function(v) { return this.css('fill-rule', v); };
-    SVGShape.prototype.stroke = function(v) { return this.css('stroke', v); }; // TODO: stroke parser 만들어야징
+    SVGShape.prototype.stroke = function(v) { return this.css('stroke', v); };
     SVGShape.prototype.strokeWidth = function(v) { return this.css('stroke-width', v); };
     SVGShape.prototype.dashArray = function() { return this.css('stroke-dasharray', [].slice.call(arguments).join(' ')); };
     SVGShape.prototype.lineCap = function(v) { return this.css('stroke-linecap', v); };
     SVGShape.prototype.lineJoin = function(v) { return this.css('stroke-linejoin', v); };
+    // transform  
+    SVGShape.prototype.transform = function(v) { return this.attr('transform', this.attr('transform') + ' ' + v); };
+    SVGShape.prototype.matrix = function(a, b, c, d, e, f) { return this.transform(['matrix(', a, b, c, d, e, f,')'].join(' ')); };
+    SVGShape.prototype.translate = function(x, y) { return this.transform(['translate(', x, y||0, ')'].join(' ')); };
+    SVGShape.prototype.scale = function(x, y) { return this.transform(['scale(', x, y||x, ')'].join(' ')); };
+    SVGShape.prototype.rotate = function(a, x, y) { return this.transform(['rotate(', a, x||0, y||0, ')'].join(' ')); };
+    SVGShape.prototype.skewX = function(a) { return this.transform(['skewX(', a, ')'].join(' '))};
+    SVGShape.prototype.skewY = function(a) { return this.transform(['skewY(', a, ')'].join(' '))};
+    
+    SVGShape.prototype.flattenMatrix = function() {
+        var prod = function(t) {
+            s = [ s[0]*t[0] + s[2]*t[1], s[1]*t[0] + s[3]*t[1],
+                  s[0]*t[2] + s[2]*t[3], s[1]*t[2] + s[3]*t[3],
+                  s[0]*t[4] + s[2]*t[5] + s[4], s[1]*t[4] + s[3]*t[5] + s[5] ];
+        };
+        
+        var s = [1, 0, 0, 1, 0, 0];
+        for(var i in k = this.attr('transform').match(/\w+\s*\([^)]*\)/g)) {
+            var c = k[i].match(/\w+/)[0], a = k[i].match(/-?\d+/g).map(function(v) { return parseFloat(v); });
+            switch(c) {
+                case 'matrix':
+                    if(a.length!=6) continue;
+                    prod(a);
+                    break;
+                case 'translate':
+                    if(a.length!=1 && a.length!=2) continue;
+                    prod([1, 0, 0, 1, a[0], a[1]]);
+                    break;
+                case 'scale':
+                    if(a.length!=1 && a.length!=2) continue;
+                    prod([a[0], 0, 0, a[1] || a[0], 0, 0]);
+                    break;
+                case 'rotate':
+                    if(a.length!=1 && a.length!=3) continue;
+                    var d = a[0]*Math.PI/180, x = a[1], y = a[2];
+                    prod([1, 0, 0, 1, x, y]);
+                    prod([Math.cos(d), Math.sin(d), -Math.sin(d), Math.cos(d), 0, 0]);
+                    prod([1, 0, 0, 1, -x, -y]);
+                    break;
+                case 'skewX':
+                    if(a.length!=1) continue;
+                    prod([1, 0, Math.tan(a[0]*Math.PI/180), 1, 0, 0]);
+                    break;
+                case 'skewY':
+                    if(a.length!=1) continue;
+                    prod([1, Math.tan(a[0]*Math.PI/180), 0, 1, 0, 0]);
+                    break;
+                default:
+            }
+        }
+        
+        return this.attr('transform', 'matrix(' + s.join(' ') + ')');
+    };
     
     // common props for <svg>, <g>
     function SVGParent() {}
@@ -137,7 +178,7 @@ var $VG = (function() {
         return SVGFactory(t).appendTo(this);
     };
     SVGParent.prototype.remove = function(t) {
-        SVGFactory(t).appendTo(buffer);
+        SVGFactory(t).appendTo(generator);
         return this;
     };
     SVGParent.prototype.addLine = function() { return this.append('<line>'); };
