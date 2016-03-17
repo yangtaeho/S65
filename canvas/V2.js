@@ -1,28 +1,3 @@
-//obj.a = 3;
-//Object.defineProperty(obj, 'a', {
-//  value: 3
-//  //, writable: true,
-//  //enumeble: true
-//});
-//
-//{
-//  get: function(){ return this._a; },
-//// set: function(v){ this._a = v; },
-//  enumeble: true
-//}
-//
-//Object.defineProperties(obj, {
-//  a: {
-//    value: 3
-//  },
-//  b: {
-//    value: 5
-//  }
-//});
-//let V;
-//{
-//  V = ...;
-//}
 const V = (()=>{
 	const readOnly = (target, v)=>{
 		for(let k in v) v[k] = {value:v[k]};
@@ -35,8 +10,6 @@ const V = (()=>{
 	const [offset, size, draw, bound, start, end, reset, image, rect, text] = N(Symbol, 10);
 
 	const Paint = (([RESET, BOUND, START, END, IMAGE, RECT, TEXT])=>{
-		//const [RESET, BOUND, START, END, IMAGE, RECT, TEXT] = N(Symbol, 7);
-
 		const Paint = class{
 			constructor(width, height){
 				this[size](width, height);
@@ -49,11 +22,12 @@ const V = (()=>{
 
 			[start](display){this[START](display);}
 			[end](display){this[END](display);}
+			// 구상클래스에서 사용함
 			[image](display){this[IMAGE](display);}
 			[rect](display){this[RECT](display);}
 			[text](display){this[TEXT](display);}
 		};
-		return Object.assign(Paint, {RESET, BOUND, START, END, IMAGE, RECT, TEXT});
+		return Object.assign(Paint, {RESET, BOUND, START, END, IMAGE, RECT, TEXT, image, rect, text});
 	})(N(Symbol, 7));
 
 	const Stage = class{
@@ -84,7 +58,7 @@ const V = (()=>{
 				this.display = isBlock ? 'block' : 'inline';
 			}
 		};
-		const Event =  (stop=>class{
+		const Event = (stop=>class{
 			constructor(target){
 				readOnly(this, {target});
 			}
