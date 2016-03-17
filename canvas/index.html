@@ -23,8 +23,7 @@
 	const stage = new V.Stage(new CanvasPaint(document.getElementById('canvas')));
 	
 	const div = new Div();
-	div.style.backgroundColor = '#ff4800';
-	div.style.border = '4 red';
+	//div.style.border = '4 red';
 	//div.style.textAlign = 'right';
 	
 	const img0 = new Img('1.jpg');
@@ -49,8 +48,11 @@
 	stage.addChild(div);
 	
 	const start = _=>{
-		let loop = ()=>{
+		let color = 100;
+		let loop = _=>{
 			if(img1.style.margin++>40) img1.style.margin = 10;
+			if(color++<255) div.style.backgroundColor = ['rgb(255', color, color].join(',')+  ')';
+			else color = 100;
 			stage.render();
 			requestAnimationFrame(loop);
 		}
