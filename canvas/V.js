@@ -1,6 +1,7 @@
 const V = (_=>{
 	const readOnly = (target, v)=>{
 		for(let k in v) v[k] = {value:v[k]};
+		for(let k of Object.getOwnPropertySymbols(v)) v[k] = {value:v[k]};
 		Object.defineProperties(target, v);
 	};
 	const error = msg=> { throw msg; };
@@ -18,7 +19,7 @@ const V = (_=>{
 				readOnly(this, {width, height});
 			}
 			[bound]({x, y, width, height}){this[BOUND](x, y, width, height);}
-			reset(){this[RESET]();}
+			[reset](){this[RESET]();}
 
 			[start](display){this[START](display);}
 			[end](display){this[END](display);}
@@ -90,8 +91,8 @@ const V = (_=>{
 				if(listeners = this[listener][type]){
 					let e = this[event].init(type);
 					for(let listener of listeners){
-						listener(ev);
-						if(ev.isStopPropagation) return;
+						listener(e);
+						if(e.isStopPropagation) return;
 					}
 				}
 			}
@@ -129,7 +130,8 @@ const V = (_=>{
 		return Object.assign(Display, {DRAW, MEASURE, OFFSET});
 	})(N(Symbol, 6));
 
-	const DisplayContainer = (([children, ids])=>class extends Display {
+	const DisplayContainer = (([children, ids])=>{
+		return class extends Display {
 		constructor(isBlock) {
 			super(isBlock);
 			readOnly(this, {
@@ -165,7 +167,7 @@ const V = (_=>{
 		[Display.MEASURE](parentWidth, parentHeight){
 			let totalH = 0, lineW = 0, lineH = 0;
 			//Css.size(this.style, parentWidth, parentHeight);
-			for(const child of this[CHILDREN]){
+			for(let child of this[children]){
 				if(child.style.display == 'none') continue;
 				let {width, height} = child[Display.MEASURE](parentWidth, 0);
 				child[size](width, height);
@@ -178,7 +180,7 @@ const V = (_=>{
 						totalH += lineH;
 						lineH = lineW = 0;
 					}
-					child.setOffset(0, totalH);
+					child[offset](0, totalH);
 					totalH += height;
 					break;
 				case'inline':
@@ -194,7 +196,7 @@ const V = (_=>{
 						lineW += width;
 						if(lineH < height) lineH = height;
 					}
-					child.setOffset(offsetX, totalH);
+					child[offset](offsetX, totalH);
 					break;
 				}
 			}
@@ -210,24 +212,24 @@ const V = (_=>{
 					break;
 				case'justify':
 					let space = 0;
-					for(const {[boundRect]:{width}, style:{_margin:[,right,,left]} of this[children]) space += width + left + right;
+					for(const {[boundRect]:{width}, style:{_margin:[,right,,left]}} of this[children]) space += width + left + right;
 					space = parentWidth - space;
 					space = space < 0 ? 0 : space / (this[children].length - 1);
-					for(const {[boundRect]:rect, style:{_margin:[,right,,left], x = 0} of this[children]){
+					for(let {[boundRect]:rect, style:{_margin:[,right,,left]}, x = 0} of this[children]){
 						rect.x = x;
 						x += rect.width + left + right + space;
 					}
 			}
 			return {width:parentWidth, height:totalH};
 		}
+	}
 	})(N(Symbol, 2));
 
 	const v = {
-		Event, Display, DisplayContainer, Stage,
+		Event, Display, DisplayContainer, Stage, Paint, N, 
 		spread(){
 			for(let k in v) window[k] = v[k];
 		}
 	};
 	return v;
 })();
-

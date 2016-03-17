@@ -1,4 +1,5 @@
-const CanvasPaint = (([background, stroke, font])=>class extends V.Paint{
+const CanvasPaint = (([background, stroke, font])=>{
+	return class extends V.Paint{
 	constructor(canvas){
 		super(canvas.width, canvas.height);
 		this.cx = canvas.getContext('2d');
@@ -51,4 +52,5 @@ const CanvasPaint = (([background, stroke, font])=>class extends V.Paint{
 		this[font](display.style);
 		this.cx.fillText(display.text, 0, 0);
 	}
-})(N(Symbol, 4))
+}
+})(V.N(Symbol, 4))
