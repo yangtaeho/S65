@@ -1,6 +1,6 @@
 class Div extends V.DisplayContainer{
 	constructor(){
-		super(true);
+		super('DIV', true);
 	}
 	[V.Display.DRAW](paint){
 		paint[V.Paint.rect](this);
@@ -11,7 +11,7 @@ class Div extends V.DisplayContainer{
 };
 class Img extends V.Display{
 	constructor(src){
-		super(false);
+		super('IMG', false);
 		Object.defineProperties(this, {
 			src:{value:src},
 			img:{value:(_=>{
@@ -27,7 +27,7 @@ class Img extends V.Display{
 		});
 	}
 	[V.Display.DRAW](paint){
-		paint.drawImage(this);
+		paint[V.Paint.image](this);
 	}
 	[V.Display.MEASURE](parentWidth, parentHeight){
 		if(this.loaded) return {width:this.img.width, height:this.img.height};
@@ -36,7 +36,7 @@ class Img extends V.Display{
 };
 class Span extends V.Display{
 	constructor(text){
-		super(false);
+		super('SPAN', false);
 		this.text = text;
 	}
 	[V.Display.DRAW](paint){
@@ -44,9 +44,9 @@ class Span extends V.Display{
 	}
 	[V.Display.MEASURE](parentWidth, parentHeight){
 		let height;
-		if(height = this.style.fontSize) height = parseFloat(v);
+		if(height = this.style.fontSize) height = parseFloat(height);
 		else height = 10;
 		height *= this.text.split('\n').length;
-		return super[V.Display.MEASURE](CanvasPaint.textWidth(this), height);
+		return {width:CanvasPaint.textWidth(this), height};
 	}
 }

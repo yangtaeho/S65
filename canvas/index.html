@@ -28,8 +28,8 @@
 	//div.style.textAlign = 'right';
 	
 	const img0 = new Img('1.jpg');
-	const img1 = new Img('1.jpg');
-	const img2 = new Img('2.jpg');
+	const img1 = new Img('2.jpg');
+	const img2 = new Img('3.jpg');
 	{
 		let loaded = 0;
 		const cb = _=>++loaded == 3 ? start() : 0;
@@ -41,6 +41,10 @@
 	div.addChild(img0);
 	div.addChild(img1);
 	div.addChild(img2);
+	
+	const span = new Span('안녕하세요');
+	span.style.fontSize = '30px'
+	div.addChild(span);
 	
 	stage.addChild(div);
 	

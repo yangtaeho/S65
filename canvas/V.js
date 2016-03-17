@@ -47,7 +47,7 @@ const V = (_=>{
 			this.root[size](width, height);
 			this.root[offset](0, 0);
 			this.paint[reset]();
-			this.root[Display.DRAW](this.paint);
+			this.root[draw](this.paint);
 		}
 	};
 
@@ -77,8 +77,9 @@ const V = (_=>{
 		})(Symbol());
 
 		const Display = class{
-			constructor(isBlock){
+			constructor(tagName, isBlock){
 				readOnly(this, {
+					tagName,
 					id:uuid++,
 					[event]:new Event(this),
 					[listener]:{},
@@ -119,7 +120,6 @@ const V = (_=>{
 				bound.height = rect.height;
 				return bound;
 			}
-
 			[draw](paint){
 				paint[start](this);
 				this[DRAW](paint);
@@ -131,98 +131,100 @@ const V = (_=>{
 	})(N(Symbol, 6));
 
 	const DisplayContainer = (([children, ids])=>{
-		return class extends Display {
-		constructor(isBlock) {
-			super(isBlock);
-			readOnly(this, {
-				[children]:new Set(),
-				[ids]:new Map()
-			});
-		}
-		addChild(display){
-			if(!(display instanceof Display)) return;
-			this.removeChild(display);
-
-			this[children].add(display);
-			this[ids][display.id] = display;
-
-		}
-		removeChild(display){
-			if(!(display instanceof Display) || !this[ids][display.id]) return;
-			this[ids].delete(display.id);
-			this[children].delete(display);
-		}
-		getChildAt(index){
-			if(this[children].size <= index) return null;
-			let idx = 0;
-			return this[children].forEach((v1, v2, set)=>idx++ == index ? set.delete(v1) : 0);
-		}
-		getChildById(id){
-			return this[ids][display.id] || null;
-		}
-		[draw](paint){
-			super[DRAW](paint);
-			for(let child of this[children]) child[draw](paint);
-		}
-		[Display.MEASURE](parentWidth, parentHeight){
-			let totalH = 0, lineW = 0, lineH = 0;
-			//Css.size(this.style, parentWidth, parentHeight);
-			for(let child of this[children]){
-				if(child.style.display == 'none') continue;
-				let {width, height} = child[Display.MEASURE](parentWidth, 0);
-				child[size](width, height);
-				const [marginT, marginR, marginB, marginL] = Css.margin(child.style);
-				width += marginL + marginR;
-				height += marginB + marginT;
-				switch(child.style.display){
-				case'block':
-					if(lineH){
-						totalH += lineH;
-						lineH = lineW = 0;
-					}
-					child[offset](0, totalH);
-					totalH += height;
-					break;
-				case'inline':
-					let offsetX = lineW;
-					if(lineW + width > parentWidth){
+		return class extends Display{
+			constructor(isBlock) {
+				super('ROOT',isBlock);
+				readOnly(this, {
+					[children]:new Set(),
+					[ids]:new Map()
+				});
+			}
+			addChild(display){
+				if(!(display instanceof Display)) return;
+				this.removeChild(display);
+	
+				this[children].add(display);
+				this[ids][display.id] = display;
+	
+			}
+			removeChild(display){
+				if(!(display instanceof Display) || !this[ids][display.id]) return;
+				this[ids].delete(display.id);
+				this[children].delete(display);
+			}
+			getChildAt(index){
+				if(this[children].size <= index) return null;
+				let idx = 0;
+				return this[children].forEach((v1, v2, set)=>idx++ == index ? set.delete(v1) : 0);
+			}
+			getChildById(id){
+				return this[ids][display.id] || null;
+			}
+			[draw](paint){
+				paint[start](this);
+				this[Display.DRAW](paint);
+				paint[end](this);
+				for(let child of this[children]) child[draw](paint);
+			}
+			[Display.MEASURE](parentWidth, parentHeight){
+				let totalH = 0, lineW = 0, lineH = 0;
+				//Css.size(this.style, parentWidth, parentHeight);
+				for(let child of this[children]){
+					if(child.style.display == 'none') continue;
+					let {width, height} = child[Display.MEASURE](parentWidth, 0);
+					child[size](width, height);
+					const [marginT, marginR, marginB, marginL] = Css.margin(child.style);
+					width += marginL + marginR;
+					height += marginB + marginT;
+					switch(child.style.display){
+					case'block':
 						if(lineH){
 							totalH += lineH;
 							lineH = lineW = 0;
 						}
-						lineW = width;
-						lineH = height;
-					}else{
-						lineW += width;
-						if(lineH < height) lineH = height;
+						child[offset](0, totalH);
+						totalH += height;
+						break;
+					case'inline':
+						let offsetX = lineW;
+						if(lineW + width > parentWidth){
+							if(lineH){
+								totalH += lineH;
+								lineH = lineW = 0;
+							}
+							lineW = width;
+							lineH = height;
+						}else{
+							lineW += width;
+							if(lineH < height) lineH = height;
+						}
+						child[offset](offsetX, totalH);
+						break;
 					}
-					child[offset](offsetX, totalH);
-					break;
 				}
+				if(lineH) totalH += lineH;
+				
+				switch(this.style.textAlign){
+					case'right':
+						let i = this[children].length, j = parentWidth;
+						while(i--){
+							let c = this[children][i], rect = c[boundRect];
+							rect.x = j -= rect.width + c.style._margin[1] + c.style._margin[3];
+						}
+						break;
+					case'justify':
+						let space = 0;
+						for(const {[boundRect]:{width}, style:{_margin:[,right,,left]}} of this[children]) space += width + left + right;
+						space = parentWidth - space;
+						space = space < 0 ? 0 : space / (this[children].length - 1);
+						for(let {[boundRect]:rect, style:{_margin:[,right,,left]}, x = 0} of this[children]){
+							rect.x = x;
+							x += rect.width + left + right + space;
+						}
+				}
+				return {width:parentWidth, height:totalH};
 			}
-			if(lineH) totalH += lineH;
-			
-			switch(this.style.textAlign){
-				case'right':
-					let i = this[children].length, j = parentWidth;
-					while(i--){
-						let c = this[children][i], rect = c[boundRect];
-						rect.x = j -= rect.width + c.style._margin[1] + c.style._margin[3];
-					}
-					break;
-				case'justify':
-					let space = 0;
-					for(const {[boundRect]:{width}, style:{_margin:[,right,,left]}} of this[children]) space += width + left + right;
-					space = parentWidth - space;
-					space = space < 0 ? 0 : space / (this[children].length - 1);
-					for(let {[boundRect]:rect, style:{_margin:[,right,,left]}, x = 0} of this[children]){
-						rect.x = x;
-						x += rect.width + left + right + space;
-					}
-			}
-			return {width:parentWidth, height:totalH};
-		}
-	}
+		};
 	})(N(Symbol, 2));
 
 	const v = {
