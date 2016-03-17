@@ -30,7 +30,7 @@
 	let img1 = new Img('1.jpg');
 	let img2 = new Img('2.jpg');
 	let loaded = 0;
-	let cb = _=>++loaded == 3 ? start() : 0;
+	let cb = ()=>++loaded == 3 ? start() : 0;
 	img0.addListener('load', cb);
 	img1.addListener('load', cb);
 	img2.addListener('load', cb);
