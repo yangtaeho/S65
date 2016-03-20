@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>s65-canvas</title>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1"/>
+</head>
+<body>
+<div id="stage"><canvas id="canvas" width="600" height="400"></canvas></div>
+<script src="Css.js"></script>
+<script src="V.js"></script>
+<script src="CanvasPaint.js"></script>
+<script src="tags.js"></script>
+<script>
+var busiEle = document.getElementById('business_table');
+//마진 따라하기 위해 테스트해봄.;
+console.log('mar bef = ' + busiEle.style.margin);
+busiEle.style.marginLeft = '99px';
+const [marginT, marginR, marginB, marginL] = Css.margin(busiEle.style);
+console.log('margin 4 = ' + marginT);
+console.log('margin 4 = ' + marginR);
+console.log('margin 4 = ' + marginB);
+console.log('margin 4 = ' + marginL);
+console.log('mar aft = ' + busiEle.style.margin);
+
+
+//패딩 테스트
+console.log('pad bef = ' + busiEle.style.padding);
+busiEle.style.paddingLeft = '99px';
+const [tempPadd1, tempPadd2, tempPadd3, paddingOnlyL] = Css.padding(busiEle.style);
+console.log('padding 1 = ' + tempPadd1);
+console.log('padding 1 = ' + tempPadd2);
+console.log('padding 1 = ' + tempPadd3);
+console.log('padding 1 = ' + paddingOnlyL);
+
+busiEle.style.padding = '5px 3px 9px 7px';
+const [paddingT, paddingR, paddingB, paddingL] = Css.padding(busiEle.style);
+console.log('padding 4 = ' + paddingT);
+console.log('padding 4 = ' + paddingR);
+console.log('padding 4 = ' + paddingB);
+console.log('padding 4 = ' + paddingL);
+
+busiEle.style.padding = '5px 120px';
+const [paddingT2, paddingB2] = Css.padding(busiEle.style);
+console.log('padding 2 = ' + paddingT2);
+console.log('padding 2 = ' + paddingB2);
+
+const [paddingAll] = Css.padding(busiEle.style);
+console.log('padding all = ' + paddingAll);
+
+console.log('pad aft = ' + busiEle.style.padding);
+</script>
+<table id='business_table'>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>5</td>
+    <td>6</td>
+  </tr>
+</table>
+</body>
+</html>
